@@ -113,6 +113,13 @@ only holds bug fixes and other minor tweaks: anything larger is covered by
 	(See Jira bug [I7-2615](https://inform7.atlassian.net/browse/I7-2615): the
 	lack of this feature could very fairly have been called a bug.)
 
+- Inform 6.45 (included with this release of I7) clarified the language design
+	to say that a braced code block can appear wherever a statement can, as in
+	most C-like languages. This is a convenience when tangling code to I6 from
+	a literate web, and in particular enables kit sources to make use of
+	named holons. The I6 parser inside I7, used for `(- ... -)` inclusions and
+	when compiling kits to Inter code, has been updated to allow these braces.
+
 - Errors occurring in I6-syntax code, either in `(- ... -)` inclusions into I7
 	source text or in kit source code, are now reported more fully, with source
 	references and links provided. (A feature request for this was filed as
@@ -213,6 +220,8 @@ external developers, which are periodically updated. In this release:
 
 ## Bug fixes
 
+- Fix for Jira bug [I7-2696](https://inform7.atlassian.net/browse/I7-2696)
+	"inblorb error with `release along with a "parchment" interpreter` with lower-case `p`"
 - Fix for Jira bug [I7-2692](https://inform7.atlassian.net/browse/I7-2692)
 	"K1_room doesn't have action_bitmap"
 - Fix for Jira bug [I7-2676](https://inform7.atlassian.net/browse/I7-2676)

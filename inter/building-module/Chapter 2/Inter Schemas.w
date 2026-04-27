@@ -484,6 +484,7 @@ void InterSchemas::log_depth(inter_schema_node *isn, int depth) {
 		InterSchemas::log_just(isn, depth);
 }
 void InterSchemas::log_just(inter_schema_node *isn, int depth) {
+	if (isn == NULL) { LOG("<null inter_schema_node>\n"); return; }
 	if (Provenance::is_somewhere(isn->provenance)) {
 		LOG("%04d ", Provenance::get_line(isn->provenance));
 	} else {

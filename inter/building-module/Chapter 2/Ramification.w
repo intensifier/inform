@@ -33,6 +33,7 @@ void Ramification::go(inter_schema *sch) {
 	REPEATEDLY_APPLY(Ramification::split_switches_into_cases);
 	REPEATEDLY_APPLY(Ramification::strip_leading_white_space);
 	REPEATEDLY_APPLY(Ramification::split_print_statements);
+	REPEATEDLY_APPLY(Ramification::remove_redundant_braces);
 	REPEATEDLY_APPLY(Ramification::identify_constructs);
 	REPEATEDLY_APPLY(Ramification::break_for_statements);
 	REPEATEDLY_APPLY(Ramification::add_missing_bodies);
@@ -60,6 +61,17 @@ these out at the start of each iteration.
 			int rv = X(NULL, sch->node_tree);
 			if (rv == FALSE) break;
 			LOGIF(SCHEMA_COMPILATION_DETAILS, "After round of " #X ":\n$1\n", sch);
+			if (rv == NOT_APPLICABLE) break;
+		}
+	}
+
+@d REPEATEDLY_APPLY_WITH_LOGGING(X)
+	{	LOG("Before round of " #X ":\n$1\n", sch);
+		Ramification::unmark(sch->node_tree);
+		while ((TRUE) && (sch->parsing_errors == NULL)) {
+			int rv = X(NULL, sch->node_tree);
+			if (rv == FALSE) break;
+			LOG("After round of " #X ":\n$1\n", sch);
 			if (rv == NOT_APPLICABLE) break;
 		}
 	}
@@ -238,8 +250,8 @@ are removed.
 int Ramification::unbrace_schema(inter_schema_node *par, inter_schema_node *isn) {
 	for (; isn; isn=isn->next_node) {
 		for (inter_schema_token *t = isn->expression_tokens, *prev = NULL; t; prev = t, t=t->next) {
-			if ((prev) && (t->ist_type == OPEN_BRACE_ISTT)) {
-				prev->next = NULL;
+			if (t->ist_type == OPEN_BRACE_ISTT) {
+				if (prev) prev->next = NULL; else isn->expression_tokens = NULL;
 				inter_schema_node *code_isn =
 					InterSchemas::new_node(isn->parent_schema, CODE_ISNT, t);
 				isn->child_node = code_isn;
@@ -776,6 +788,63 @@ int Ramification::split_print_statements(inter_schema_node *par, inter_schema_no
 	return FALSE;
 }
 
+@h The remove redundant braces ramification.
+A formal change to the Inform 6 language in April 2026 clarified that, as in
+the C family of languages, braces can be placed around any group of statements.
+So for example:
+
+``` Inform6
+	{
+		print "This is unconditionally executed, just once.^";
+	}
+```
+
+is equivalent to
+
+``` Inform6
+	print "This is unconditionally executed, just once.^";
+```
+
+Such redundant brace pairs manifest here as expression nodes at the top level
+which have only white space inside them, and have a code block node as a child.
+We can now throw out that node, so:
+
+``` None
+	EXPRESSION_ISNT
+		CODE_ISNT
+			EXPRESSION_ISNT
+				print ...
+```
+
+becomes:
+
+``` None
+	EXPRESSION_ISNT (empty)
+	EXPRESSION_ISNT
+		print ...
+```
+
+=
+int Ramification::remove_redundant_braces(inter_schema_node *par, inter_schema_node *isn) {
+	for (; isn; isn=isn->next_node) {
+		inter_schema_token *first = InterSchemas::first_dark_token(isn);
+		if ((first == NULL) && (isn->isn_type == EXPRESSION_ISNT) && (isn->child_node) && (isn->child_node->isn_type == CODE_ISNT)) {
+			inter_schema_node *content = isn->child_node->child_node;
+			if (content == NULL) internal_error("misplaced CODE node");
+			isn->child_node = isn->child_node->next_node;
+			inter_schema_node *last = content;
+			while ((last) && (last->next_node)) last = last->next_node;
+			last->next_node = isn->next_node;
+			isn->next_node = content;
+			for (inter_schema_node *n = content; n; n = n->next_node)
+				n->parent_node = isn->parent_node;
+			return TRUE;
+		}
+		if (Ramification::remove_redundant_braces(isn, isn->child_node)) return TRUE;
+	}
+	return FALSE;
+}
+
 @h The identify constructs ramification.
 At this point each individual expression or statement is represented by the
 tokens under an `EXPRESSION_ISNT` node. It's legal to give an expression as
@@ -815,7 +884,6 @@ int Ramification::identify_constructs(inter_schema_node *par, inter_schema_node 
 		if ((cons->isn_type != ASSEMBLY_ISNT) && (cons->isn_type != DIRECTIVE_ISNT))
 			if (Ramification::identify_constructs(cons, cons->child_node)) return TRUE;
 	}
-
 	return FALSE;
 }
 
