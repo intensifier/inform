@@ -7,6 +7,7 @@ What shall we test?
 @d PROGRAM_NAME "words-test"
 
 @e TEST_LEXER_CLSW
+@e TEST_TOKENISER_CLSW
 @e TEST_PREFORM_CLSW
 
 =
@@ -19,6 +20,8 @@ int main(int argc, char **argv) {
 
 	CommandLine::declare_switch(TEST_LEXER_CLSW, U"test-lexer", 2,
 		U"test lexing of natural language text from file X");
+	CommandLine::declare_switch(TEST_TOKENISER_CLSW, U"test-tokeniser", 2,
+		U"test tokenising of natural language text from file X");
 	CommandLine::declare_switch(TEST_PREFORM_CLSW, U"test-preform", 2,
 		U"test Preform parsing a sample grammar against the text in file X");
 
@@ -33,6 +36,7 @@ int main(int argc, char **argv) {
 void Main::respond(int id, int val, text_stream *arg, void *state) {
 	switch (id) {
 		case TEST_LEXER_CLSW: Unit::test_lexer(arg); break;
+		case TEST_TOKENISER_CLSW: Unit::test_tokeniser(arg); break;
 		case TEST_PREFORM_CLSW: Unit::test_preform(arg); break;
 	}
 }

@@ -62,13 +62,13 @@ source_file *SourceText::read_file(inbuild_copy *C, ls_web *W, filename *F,
 		@<Deal with literate source errors@>;
 		if (succeeded) {
 			sf = TextFromFiles::feed_open_file_into_lexer(F, NULL, W,
-				leaf, documentation_only, ref, mode);
+				leaf, documentation_only, ref, mode, FALSE);
 		}
 	} else {
 		FILE *handle = Filenames::fopen(F, "r");
 		if (handle) {
 			sf = TextFromFiles::feed_open_file_into_lexer(F, handle, NULL,
-				leaf, documentation_only, ref, mode);
+				leaf, documentation_only, ref, mode, FALSE);
 			if (sf == NULL) {
 				Copies::attach_error(C, CopyErrors::new_F(OPEN_FAILED_CE, -1, F));
 			} else {

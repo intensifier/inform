@@ -1,0 +1,25 @@
+Test: BIP-Subs
+Language: Basic
+For: Z-Machine
+
+To begin:
+	say "First, [disclaimer].";
+	let x be "tennis";
+	say "We consider [x].";
+	say "Then, [praise for x].";
+	say "Then, [praise for `golf`].";
+	say "Then, [praise for `'crazy' golf`].";
+	say "Then, [praise for `golf not [x]`].";
+	say "Then, [praise for `golf not [praise for `hammer-throwing`]`].";
+	showme placard;
+	showme notice.
+
+The notice is a text that varies. The notice is "[praise for `curling`] and [praise for `[placard]`]".
+
+The placard is a text that varies. The placard is "petanque".
+
+To say disclaimer:
+	say "I don't know much about sport".
+
+To say praise for (T - text):
+	say "all praise [T]".

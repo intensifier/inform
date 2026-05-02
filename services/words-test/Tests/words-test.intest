@@ -1,4 +1,5 @@
 -cases 'services/words-test/Tests/Test Cases'
+-cases [Tok] 'services/words-test/Tests/Test Tokens'
 
 -recipe
 
@@ -7,6 +8,25 @@
 	mkdir: $PATH/_Results_Actual
 
 	step: services/words-test/Tangled/words-test -test-$CASE $PATH/$CASE.txt >$A 2>&1
+	or: 'produced errors in words-test' $A
+
+	show: $A
+
+	exists: $I
+	or: 'passed without errors but no blessed output existed'
+
+	match text: $A $I
+	or: 'produced incorrect output'
+
+-end
+
+-recipe [Tok]
+
+	set: $A = $PATH/_Results_Actual/$CASE.txt
+	set: $I = $PATH/_Results_Ideal/$CASE.txt
+	mkdir: $PATH/_Results_Actual
+
+	step: services/words-test/Tangled/words-test -test-tokeniser $PATH/$CASE.txt >$A 2>&1
 	or: 'produced errors in words-test' $A
 
 	show: $A

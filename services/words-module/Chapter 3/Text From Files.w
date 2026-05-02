@@ -83,7 +83,8 @@ We also want to look out for the tear-off documentation line, if there is one.
 
 =
 source_file *TextFromFiles::feed_open_file_into_lexer(filename *F, FILE *handle,
-	void *W, text_stream *leaf, int documentation_only, general_pointer ref, int mode) {
+	void *W, text_stream *leaf, int documentation_only, general_pointer ref, int mode,
+	int expanding) {
 	source_file *sf = TextFromFiles::new_sf(F, handle, W, ref, mode);
 	inchar32_t cr, last_cr, next_cr, read_cr, newline_char = 0;
 	int torn_off = FALSE;
@@ -93,6 +94,7 @@ source_file *TextFromFiles::feed_open_file_into_lexer(filename *F, FILE *handle,
 	top_of_file.line_number = 1;
 
 	Lexer::feed_begins(top_of_file);
+	lexer_divide_strings_at_text_substitutions = expanding;
 	if (documentation_only) lexer_wait_for_dashes = TRUE;
 
 	last_cr = ' '; cr = ' '; next_cr = TextFromFiles::next_char(sf);
@@ -174,7 +176,16 @@ source_file *TextFromFiles::feed_into_lexer(filename *F, general_pointer ref) {
 	FILE *handle = Filenames::fopen(F, "r");
 	if (handle == NULL) return NULL;
 	source_file *sf = TextFromFiles::feed_open_file_into_lexer(F, handle, NULL,
-		Filenames::get_leafname(F), FALSE, ref, UNICODE_UFBHM);
+		Filenames::get_leafname(F), FALSE, ref, UNICODE_UFBHM, FALSE);
+	fclose(handle);
+	return sf;
+}
+
+source_file *TextFromFiles::feed_into_lexer_expanding(filename *F, general_pointer ref) {
+	FILE *handle = Filenames::fopen(F, "r");
+	if (handle == NULL) return NULL;
+	source_file *sf = TextFromFiles::feed_open_file_into_lexer(F, handle, NULL,
+		Filenames::get_leafname(F), FALSE, ref, UNICODE_UFBHM, TRUE);
 	fclose(handle);
 	return sf;
 }

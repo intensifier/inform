@@ -84,6 +84,8 @@ characters cause word divisions, or signal literals.
 @d TEXT_SUBSTITUTION_BEGIN '[' /* Inside strings, this denotes a text substitution */
 @d TEXT_SUBSTITUTION_END ']'
 @d TEXT_SUBSTITUTION_SEPARATOR ','
+@d INNER_STRING_BEGIN '`'
+@d INNER_STRING_END '`'
 @d COMMENT_BEGIN '[' /* Text between these, outside strings, is comment */
 @d COMMENT_END ']'
 @d INFORM6_ESCAPE_BEGIN_1 '(' /* Text beginning with this pair is literal I6 code */
@@ -525,7 +527,7 @@ int lxs_most_significant_space_char; /* Most significant whitespace character pr
 int lxs_number_of_tab_stops; /* Number of consecutive tabs */
 int lxs_this_line_is_empty_so_far; /* Current line white space so far? */
 int lxs_this_word_is_empty_so_far; /* Looking for a word to start? */
-int lxs_scanning_text_substitution; /* Used to break up strings at [substitutions] */
+int lxs_scanning_text_substitution_depth; /* Used to break up strings at [substitutions] */
 
 /* significant in literal mode: */
 int lxs_comment_nesting; /* For square brackets within square brackets */
@@ -558,7 +560,7 @@ void Lexer::reset_lexer(void) {
 	lxs_literal_mode = FALSE; /* begin in ordinary mode... */
 	lxs_kind_of_word = ORDINARY_KW; /* ...expecting an ordinary word */
 	lxs_string_soak_up_spaces_mode = FALSE;
-	lxs_scanning_text_substitution = FALSE;
+	lxs_scanning_text_substitution_depth = 0;
 	lxs_comment_nesting = 0;
 }
 
@@ -752,7 +754,6 @@ extending to `lexer_hwm-1`.
 =
 void Lexer::feed_char_into_lexer(inchar32_t c) {
 	Lexer::ensure_lexer_hwm_can_be_raised_by(MAX_WORD_LENGTH, TRUE);
-
 	if (lxs_literal_mode) {
 	    @<Contemplate leaving literal mode@>;
     	if (lxs_kind_of_word == STRING_KW) {
@@ -769,10 +770,17 @@ void Lexer::feed_char_into_lexer(inchar32_t c) {
 		return;
 	}
 
+	if ((lxs_this_word_is_empty_so_far) && (lxs_scanning_text_substitution_depth % 2 == 1)) {
+		if (c == INNER_STRING_BEGIN) {
+			c = STRING_BEGIN;
+			lxs_scanning_text_substitution_depth++;
+		}
+	}
+
     /* otherwise record the current character as part of the word being built */
 	*(lexer_hwm++) = c;
 
-    if (lxs_scanning_text_substitution) {
+    if (lxs_scanning_text_substitution_depth % 2 == 1) {
         @<Force string division at the end of a text substitution, if necessary@>;
     }
 
@@ -1022,8 +1030,16 @@ finished.
 	    	}
             break;
         case STRING_KW:
-            if (c == STRING_END) {
+            if ((c == STRING_END) ||
+            	((c == INNER_STRING_END) && (lxs_scanning_text_substitution_depth > 0) &&
+            		(lxs_scanning_text_substitution_depth % 2 == 0))) {
                 lxs_string_soak_up_spaces_mode = FALSE;
+                if (c == STRING_END) {
+                	lxs_scanning_text_substitution_depth = 0;
+                } else {
+                	c = STRING_END;
+                	lxs_scanning_text_substitution_depth--;
+                }
                 *(lexer_hwm++) = c; /* record the `STRING_END` character as part of the word */
                 lxs_literal_mode = FALSE;
             }
@@ -1060,12 +1076,17 @@ to recording the character, so to get rid of the `[` character, we change
 `c` to a space:
 
 @<Force string division at the start of a text substitution, if necessary@> =
-    if ((lexer_divide_strings_at_text_substitutions) && (c == TEXT_SUBSTITUTION_BEGIN)) {
-        Lexer::feed_char_into_lexer(STRING_END); /* feed `"` to close the old string */
-        Lexer::feed_char_into_lexer(' ');
-        Lexer::feed_char_into_lexer(TEXT_SUBSTITUTION_SEPARATOR); /* feed `,` to start new word */
-        c = ' '; /* the lexer now goes on to record a space, which will end the `,` word */
-        lxs_scanning_text_substitution = TRUE; /* but remember that we must get back again */
+    if (lexer_divide_strings_at_text_substitutions) {
+    	if ((c == TEXT_SUBSTITUTION_BEGIN) && (lxs_scanning_text_substitution_depth % 2 == 0)) {
+    		int d = lxs_scanning_text_substitution_depth;
+    		if (d == 0) {
+		        Lexer::feed_char_into_lexer(STRING_END); /* feed `"` to close the old string */
+		        Lexer::feed_char_into_lexer(' ');
+		        Lexer::feed_char_into_lexer(TEXT_SUBSTITUTION_SEPARATOR); /* feed `,` to start new word */
+		        c = ' '; /* the lexer now goes on to record a space, which will end the `,` word */
+		    }
+	        lxs_scanning_text_substitution_depth = d+1; /* but remember that we must get back again */
+	    }
     }
 
 @ Whereas we see to close squares after recording the character, so we have
@@ -1087,11 +1108,16 @@ open quotes again, we have put the lexer into literal mode: and so the
 spurious space is never fed, and there is no problem.
 
 @<Force string division at the end of a text substitution, if necessary@> =
-    if ((lexer_divide_strings_at_text_substitutions) && (c == TEXT_SUBSTITUTION_END)) {
-        lxs_scanning_text_substitution = FALSE;
-		*(lexer_hwm-1) = TEXT_SUBSTITUTION_SEPARATOR; /* overwrite recorded copy of `]` with `,` */
-		Lexer::feed_char_into_lexer(' '); /* then feed a space to end the `,` word */
-		Lexer::feed_char_into_lexer(STRING_BEGIN); /* then feed `"` to open a new string */
+    if (lexer_divide_strings_at_text_substitutions) {
+    	if ((c == TEXT_SUBSTITUTION_END) && (lxs_scanning_text_substitution_depth % 2 == 1)) {
+	        int d = lxs_scanning_text_substitution_depth;
+	        if (d == 1) {
+				*(lexer_hwm-1) = TEXT_SUBSTITUTION_SEPARATOR; /* overwrite recorded copy of `]` with `,` */
+				Lexer::feed_char_into_lexer(' '); /* then feed a space to end the `,` word */
+				Lexer::feed_char_into_lexer(STRING_BEGIN); /* then feed `"` to open a new string */
+			}
+			lxs_scanning_text_substitution_depth = d - 1;
+		}
 	}
 
 @ Finally, note that the breaking-up process may result in empty strings

@@ -9,7 +9,7 @@ How we shall test it.
 =
 void Unit::test_lexer(text_stream *arg) {
 	filename *F = Filenames::from_text(arg);
-	source_file *sf = TextFromFiles::feed_into_lexer(F, NULL_GENERAL_POINTER);
+	source_file *sf = TextFromFiles::feed_into_lexer_expanding(F, NULL_GENERAL_POINTER);
 	if (sf == NULL) PRINT("File has failed to open\n");
 	else {
 		PRINT("File contained %d lexer words\nWord counted at %d\n",
@@ -25,6 +25,30 @@ void Unit::test_lexer(text_stream *arg) {
 		}
 		PRINT("\n");
 		PRINT("File contained %d distinct words\n", c);
+		PRINT("\n");
+		int n = 0;
+		LOOP_THROUGH_WORDING(wn, sf->text_read) {
+			inchar32_t *p = Lexer::word_text(wn);
+			PRINT("%04d: %w\n", n++, p);
+		}
+		PRINT("\n");
+	}
+}
+
+@
+
+=
+void Unit::test_tokeniser(text_stream *arg) {
+	filename *F = Filenames::from_text(arg);
+	source_file *sf = TextFromFiles::feed_into_lexer_expanding(F, NULL_GENERAL_POINTER);
+	if (sf == NULL) PRINT("File has failed to open\n");
+	else {
+		int n = 0;
+		LOOP_THROUGH_WORDING(wn, sf->text_read) {
+			inchar32_t *p = Lexer::word_text(wn);
+			PRINT("%04d: %w\n", n++, p);
+		}
+		PRINT("\n");
 	}
 }
 
