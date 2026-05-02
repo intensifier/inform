@@ -1,4 +1,4 @@
-Test: Articulation
+Test: Articulation-G
 For: Glulx
 
 "Articulation" by "Zed Lopez"

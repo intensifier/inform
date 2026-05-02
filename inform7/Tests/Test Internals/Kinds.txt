@@ -1,4 +1,4 @@
-Test: Index-Kinds
+Test: Kinds
 TestCompilerInternals: Yes
 
 Home is a room.

@@ -1,4 +1,4 @@
-Test: Optional
+Test: Optionals
 
 The Reform Club is a room.
 

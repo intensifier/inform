@@ -1,4 +1,4 @@
-Test: ROTA
+Test: Index-Map-ROTA
 TestCompilerInternals: Yes
 
 "The Back To Tolti-Aph Affair"

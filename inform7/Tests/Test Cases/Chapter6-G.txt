@@ -1,4 +1,4 @@
-Test: Chapter6
+Test: Chapter6-G
 For: Glulx
 
 "Chapter 6: Return of the Fussy Table" by Emily Short.
