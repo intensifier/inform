@@ -18115,18 +18115,6 @@ These colour names are each prefixed with `basic` because authors often want to 
 >
 > Resets both the foreground and background colours to their usual setting. The American spelling `say [default colors]` can also be used.
 
-> phrase: set the foreground colour to (basic colour)
-> 
-> Sets the foreground colour for text to a basic colour.
-
-> phrase: set the background colour to (basic colour)
->
-> Sets the background colour for text to a basic colour. 
-
-> phrase: reset the screen colours
->
-> Resets both the foreground and background colours to their usual setting.
-
 **Glulx**. Direct styling of colours is not part of the Glulx/Glk specification, and there are principled reasons for that. Glulx was designed both for portability and also accessibility, with the needs of partially-sighted players kept always in mind. The model was intended to be more like that of a Kindle ebook, where it is (largely) for the reader to choose how the text will appear: the author of the book just writes the words.
 
 However, the Glk specification is extensible, and some though not all interpreters today do support an extension to Glk providing for coloured text. Not every author will want to use this feature. It is mainly intended for stories which will only be played on web browsers, where we can be fairly confident that the colours will come out as intended, and where (on good browsers, at least) accessibility features are provided so that readers can indeed choose how text appears to them.
@@ -18237,12 +18225,12 @@ The windows into which it is divided must all be declared explicitly in the sour
 So by default, `showme the list of glk windows` produces:
 
 ``` transcript
-"list of glk windows" = list of glk windows: {main window, status window, quote window}
+"list of glk windows" = list of glk windows: {main window, status window, boxed quotation window}
 ```
 
 In fact, `glk window` has three subkinds, which represent the different sorts of window we might need: `text buffer window`, `text grid window` and `graphics window`; and it is itself a kind of `abstract object`, which is a kind of `object`. Thus we have:
 
-- `object` ▸ `abstract object` ▸ `glk window` ▸ `text buffer window` ▹ main window, quote window
+- `object` ▸ `abstract object` ▸ `glk window` ▸ `text buffer window` ▹ main window, boxed quotation window
 
 - `object` ▸ `abstract object` ▸ `glk window` ▸ `text grid window` ▹ status window
 
@@ -18256,7 +18244,7 @@ then we get, assuming we haven't created any extra windows,
 ``` transcript
 main window: text buffer window type.
 status window: text grid window type.
-quote window: text buffer window type.
+boxed quotation window: text buffer window type.
 ```
 
 So, what goes on here?
@@ -18265,7 +18253,7 @@ So, what goes on here?
 
 - The `status window` is a `text grid window`. This is traditionally a bar across the top line or two of the screen, which is a sort of summary of the situation. In an IF story it might show the current room name, and/or the score, number of turns played, or time of day. Being a `text grid window` means that text appears on it at regularly-spaced grid positions, rather like typewritten letters. Here a "w" will be the same width as an "i", or a space, or anything else.
 
-- The `quote window` is a `text buffer window`. This can overlay the `main window` for a time, and was historically used to display an apposite quotation, which is why it's so named. (See [Displaying quotations].)
+- The `boxed quotation window` is a `text buffer window`. This can overlay the `main window` for a time, and was historically used to display an apposite quotation, which is why it's so named. (See [Displaying quotations].)
 
 There's also a third glk window type, `graphics window`, but in the default setup stories are pure textual and no window exists with this type. That doesn't mean that the main window can't display pictures, or emoji: but only a `graphics` window can plot arbitrary shapes or designs. Inform doesn't provide phrases for doing that in its basic installation, but extensions do.
 
@@ -18287,7 +18275,7 @@ There's also a third glk window type, `graphics window`, but in the default setu
 > > [!WARNING]
 > > A known bug in the MacOS Inform app's Story panel version of Glk means that it reports `text buffer window` widths in pixels, not characters. That likely affects the story only when running in the app, not when Released.
 
-The basic installation of Inform does not contain phrases to open or close windows. The `main window` and `status window` are open throughout play, and the `quote window` is opened automatically if needed. So Inform does not, out of the box, provide ways to open or close other windows at other times. This is not because Glk can't do that: Glk contains elegant mechanisms for creating a cascade of Glk windows, panelling the screen in a variety of different ways. But since most users never need that, the functionality is left for extensions to provide for. In particular, see Flexible Windows.
+The basic installation of Inform does not contain phrases to open or close windows. The `main window` and `status window` are open throughout play, and the `boxed quotation window` is opened automatically if needed. So Inform does not, out of the box, provide ways to open or close other windows at other times. This is not because Glk can't do that: Glk contains elegant mechanisms for creating a cascade of Glk windows, panelling the screen in a variety of different ways. But since most users never need that, the functionality is left for extensions to provide for. In particular, see Flexible Windows.
 
 However, even an unextended Inform allows the following:
 
@@ -18320,7 +18308,7 @@ Glk windows have two `number` properties, `rock number` and `glk window handle`:
 
 Inform stories ordinarily pause at the same point in each turn to wait for the player to type something which will be parsed as a command and turned into actions. But it's possible to pause at other times, or to get typed input for other reasons. The following phrases work on both Glulx and the Z-machine.
 
-> phrase: the code of the next pressed key ... unicode character
+> phrase: next pressed key ... unicode character
 >
 > This phrase pauses and waits for the player to press a single key.
 
@@ -18426,11 +18414,17 @@ Event types are useful because most of the time we want to write a rule applying
 	A glk event handling rule for a timer event:
 		say "Time out! [event]."
 
-Events of different event types work differently, and have to be handled in different ways. The next few sections cover how to handle particular event types, but there is one more phrase which can usefully be applied to glk events of at least some different types:
+Events of different event types work differently, and have to be handled in different ways. The next few sections cover how to handle particular event types, but there is one more phrase which can usefully be applied to glk events of several different types. What these have in common is that they take place in or on a given window.
+
+Inform provides the adjective `windowed` to determine whether a `glk event` (or a `glk event type`) is associated with a window: at present the windowed events are the character events, line events, hyperlink events and mouse events.
 
 > phrase: {ph_glkeventwindow} window of (glk event) ... glk window
 >
-> Some input-related events take place in or on a given window: `character event`, `line event`, `hyperlink event`, and `mouse event`. For events of those types, this phrase tells us where they took place. If used on events of any other type, i.e., events not tied to any specific window, a run-time problem is issued.
+> For a windowed event, this gives the window where the event is taking place. If used on events which are not windowed, a run-time problem is issued. So for example, the following uses the phrase safely:
+>
+>     A glk handling rule for a windowed glk event type:
+>         if the window of the event is the status line:
+>         say "Status line update! [event]."
 
 ## Character and line events
 
@@ -18481,6 +18475,37 @@ Some types of event can be created even though they haven't happened yet, and th
 > Though the Inform command parser would treat all three commands just the same, that all happens much higher up than in this input-output layer. The texts are different, so the events are different.
 > 
 > The `in (glk window)` can be omitted, in which case the event is in the `main window`.
+
+## Timer events
+
+^^{timer events}
+
+Glk contains a real-time timer. This is more like a pulse than a magazine
+subscription: it is intended for regular pings at short intervals — for example, to move the game state on every five seconds — rather than to make something
+happen after an hour of play. Bearing in mind that a player might save the game in between pulses of a timer, and that we cannot reliably assume that the restored game would continue the timer at the same exact moment, it's probably best to use this feature for rapid updates.
+
+Glk has just one timer, and it is either running or not: and even so, the feature is available only if `timers feature` is `supported`. When the timer pings, a timer event is issued.
+
+### How to request these events
+
+Glk sends us these events only if we have requested them. By default, an Inform story never requests character events.
+
+> phrase: {ph_requesttimer} request timer events every (N - number) milliseconds
+>
+> `N` should be positive. This tells Glk to send timer events once every `N` milliseconds until further notice, that is, until we either `cancel timer events` or use this phrase again with a different frequency. Does nothing if the `timers feature` is not `supported`.
+
+> phrase: {ph_canceltimer} cancel timer events
+>
+> Causes Glk to stop sending timer events, if in fact it was. Does nothing if the `timers feature` is not `supported`.
+
+### Details for these events
+
+None, really. For example:
+
+	A glk event handling rule for a timer event:
+		say "Ping! [event]."
+
+prints back only ``Ping! timer event.``, because there are no other details attached to the event. It is not associated with any window, and carries no information.
 
 ## Hyperlinks 
 
@@ -18653,22 +18678,12 @@ where no prompt or typing is visible, but where it's clear that a command has ne
 
 ### Dubious
 
-> phrase: say "[link (hyperlink tag)]"
-> phrase: say "[link (hyperlink tag) for (value)]"
->
-> You can also start a hyperlink just using a tag (if that type of hyperlink doesn't use a value), or both a hyperlink tag and its value.
-
 Hyperlink tags and their corresponding values are then combined into a kind called a `tagged hyperlink`. Even though Glk only allows hyperlinks to carry a single number, tagged hyperlinks can contain almost all kinds found in Inform, with the exception of real numbers. Authors must however be careful not to try to put an ephemeral value into a hyperlink, such as some local variables. The hyperlink phrases described below will display an error if it cannot safely put a value inside a tagged hyperlink.
 
 > phrase: tag of (tagged hyperlink) ... hyperlink
 > phrase: value of (tagged hyperlink) as a (name of kind of value K) ... K
 >
 > These phrases will extract the hyperlink tag and value out of a hyperlink. Note that it is the author's responsibility to use the correct kind of value when extracting the value. Inform cannot detect if you use the wrong kind, but using a value extracted with the wrong kind could cause serious problems down the line.
-
-> phrase: say "[link (hyperlink tag)]"
-> phrase: say "[link (hyperlink tag) for (value)]"
->
-> You can also start a hyperlink just using a tag (if that type of hyperlink doesn't use a value), or both a hyperlink tag and its value.
 
 ## Suspending text input while handling events
 
@@ -18678,9 +18693,22 @@ Sometimes when a Glk event arrives we will want to respond. But how can we do th
 
 The Glk interface allows us to instead _suspend_ text input. We can then output whatever we like, before we resume text input.
 
+> phrase: {ph_suspendtextinput} suspend text input
+>
+> Suspends any text input in the currently active window. The phrase option `without input echoing` can be used to prevent the partially typed input from being printed into the window.
+>
+> > [!CAUTION]
+> > By default if we suspend line input then whatever the player has already typed will remain visible. Altering that can produce quite a messy transcript. It is to avoid this that the `without input echoing` option is provided here, but note that a special use option must also be enabled for this to work properly:
+> >
+> >     Use manual line input echoing.
+
 > phrase: suspend text input in (glk window)
 >
-> Suspends any text input in the specified window.
+> Suspends any text input in the specified window. Again, this supports the `without input echoing` phrase option.
+
+> phrase: {ph_resumetextinput} resume text input
+>
+> If text input in the currently active window was suspended, this resumes it. If not, this does nothing.
 
 > phrase: resume text input in (glk window)
 >
@@ -18696,26 +18724,13 @@ Suspended character input is simple enough, but what about line input: what happ
 >
 > Updates the current line input of a suspended Glk window. A run-time problem is issued if the window has either never requested line input, or is currently not suspended.
 
-> phrase: suspend text input in (glk window), without input echoing
->
-> Suspends input without echoing the current line input.
->
-> > [!CAUTION]
-> > By default if we suspend line input then whatever the player has already typed will remain visible. Altering that can produce quite a messy transcript. So there is an option to suspend and resume input without printing anything in between. A special use option must also be enabled for the `without input echoing` option to work properly:
-> >
-> >     Use manual line input echoing.
-
 ## Other Glk event types
-
-^^{Handle Glk timer events}
 
 Glk supports several other event types, though most will be of limited use to Inform authors. Extensions may make more use of them: at present, core Inform does not.
 
 * A `screen resize event` is generated whenever the size of the interpreter window is changed. Inform has a screen resize event handling rule that redraws the status window because if the width has changed then part of the status window might have been erased, or it might not be correctly aligned anymore.
 
 * Similarly a `graphics window lost event` is generated when a graphics window needs to be redrawn.
-
-* A `timer event` is generated when a timer fires. Inform doesn't come with any phrases for making timers out of the box, but see the "Lost in My Thoughts" example.
 
 * A `mouse event` can be generated when you click in a grid window or graphics window.
 

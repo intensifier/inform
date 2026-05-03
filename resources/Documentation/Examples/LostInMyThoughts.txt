@@ -1,5 +1,5 @@
-Example: ** Lost In My Thoughts
-Location: Other Glk event types
+Example: * Lost In My Thoughts
+Location: Timer events
 RecipeLocation: Glk
 Index: Handle Glk timer events
 Description: Create and handle timer events.
@@ -16,16 +16,11 @@ While Inform does track the time of day, it doesn't, by default, show the time i
 	When play begins:
 		now the right hand status line is "Time: [time of day]".
 
-Inform doesn't come with support for making timer events out of the box, but it's easy to add a phrase calling the function:
-
-	{**}To request timer events every (N - number) milliseconds:
-		(- glk_request_timer_events({N}); -).
-
-Now all we need to do is create an event handler, and then start the timer:
+Now all we need to do is create an event handler, and then start the timer. 500ms is of course a half-second, so the game minutes will tick by very rapidly during this daydream.
 
 	{**}Glk event handling rule for a timer event:
 		increase the time of day by 1 minute;
-		redraw the status line;
+		redraw the status line.
 	
 	When play begins:
-		request timer events every 500 milliseconds;
+		request timer events every 500 milliseconds.

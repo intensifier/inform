@@ -225,8 +225,13 @@ require extensions.</p>
 <span class="plain-syntax">    (documented at ph_glkeventtextvalue):</span>
 <span class="plain-syntax">    (- GLK_EVENT_TY_Text({ev}, {-new: text}) -).</span>
 
-<span class="plain-syntax">To request timer events every (N - number) milliseconds:</span>
+<span class="plain-syntax">To request timer events every (N - number) milliseconds</span>
+<span class="plain-syntax">    (documented at ph_requesttimer):</span>
 <span class="plain-syntax">    (- glk_request_timer_events({N}); -).</span>
+
+<span class="plain-syntax">To cancel timer events</span>
+<span class="plain-syntax">    (documented at ph_canceltimer):</span>
+<span class="plain-syntax">    (- glk_request_timer_events(0); -).</span>
 </pre>
 <div class="lsmarkdown">
 <p class="commentary firstcommentary"><a id="SP9" class="paragraph-anchor"></a><b>&#167;9. </b>  And now the glk event handling rules themselves.</p>
@@ -357,13 +362,15 @@ other code you like.</li>
 <span class="plain-syntax">A glk window can be requesting mouse input.</span>
 <span class="plain-syntax">The requesting mouse input property translates into Inter as "requesting_mouse".</span>
 
-<span class="plain-syntax">To suspend text input, without input echoing:</span>
+<span class="plain-syntax">To suspend text input, without input echoing</span>
+<span class="plain-syntax">    (documented at ph_suspendtextinput):</span>
 <span class="plain-syntax">    (- SuspendTextInput(active_window, {phrase options}); -).</span>
 
 <span class="plain-syntax">To suspend text input in (win - a glk window), without input echoing:</span>
 <span class="plain-syntax">    (- SuspendTextInput({win}, {phrase options}); -).</span>
 
-<span class="plain-syntax">To resume text input:</span>
+<span class="plain-syntax">To resume text input</span>
+<span class="plain-syntax">    (documented at ph_resumetextinput):</span>
 <span class="plain-syntax">    (- ResumeTextInput(active_window); -).</span>
 
 <span class="plain-syntax">To resume text input in (win - a glk window):</span>

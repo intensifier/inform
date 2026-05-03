@@ -251,6 +251,8 @@ phs_colourletters phs_colourbackground phs_defaultcolours _ WI_25_4 "25.4" "25.4
 ph_glkwindowheight ph_glkwindowwidth ph_glkwindowclear ph_glkwindowfocus ph_glksetcursor _ WI_25_6 "25.6" "25.6. Dividing the screen into windows"
 ph_glkeventtype ph_glkeventwindow _ WI_26_1 "26.1" "26.1. Glk events"
 ph_glkeventcharactervalue ph_glkeventtextvalue ph_glkcharacterevent ph_glklineevent _ WI_26_2 "26.2" "26.2. Character and line events"
+ph_requesttimer ph_canceltimer _ WI_26_3 "26.3" "26.3. Timer events"
+ph_suspendtextinput ph_resumetextinput _ WI_26_6 "26.6" "26.6. Suspending text input while handling events"
 FIGURES kind_figurename _ WI_27_3 "27.3" "27.3. Gathering the figures"
 PM_PictureNotTextual PM_PictureDuplicate _ WI_27_4 "27.4" "27.4. Declaring and previewing the figures"
 ph_displayfigure _ WI_27_5 "27.5" "27.5. Displaying the figures"

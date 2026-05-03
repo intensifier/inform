@@ -170,8 +170,13 @@ To decide what text is the text of (ev - glk event)
 	(documented at ph_glkeventtextvalue):
 	(- GLK_EVENT_TY_Text({ev}, {-new: text}) -).
 
-To request timer events every (N - number) milliseconds:
+To request timer events every (N - number) milliseconds
+	(documented at ph_requesttimer):
 	(- glk_request_timer_events({N}); -).
+
+To cancel timer events
+	(documented at ph_canceltimer):
+	(- glk_request_timer_events(0); -).
 
 @ And now the glk event handling rules themselves.
 
@@ -300,13 +305,15 @@ The text input status property translates into Inter as "text_input_status".
 A glk window can be requesting mouse input.
 The requesting mouse input property translates into Inter as "requesting_mouse".
 
-To suspend text input, without input echoing:
+To suspend text input, without input echoing
+	(documented at ph_suspendtextinput):
 	(- SuspendTextInput(active_window, {phrase options}); -).
 
 To suspend text input in (win - a glk window), without input echoing:
 	(- SuspendTextInput({win}, {phrase options}); -).
 
-To resume text input:
+To resume text input
+	(documented at ph_resumetextinput):
 	(- ResumeTextInput(active_window); -).
 
 To resume text input in (win - a glk window):

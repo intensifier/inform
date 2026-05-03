@@ -415,6 +415,10 @@ USAGE: ph_glkeventcharactervalue 0 0 0
 USAGE: ph_glkeventtextvalue 0 0 0
 USAGE: ph_glkcharacterevent 0 0 0
 USAGE: ph_glklineevent 0 0 0
+USAGE: ph_requesttimer 0 0 0
+USAGE: ph_canceltimer 0 0 0
+USAGE: ph_suspendtextinput 0 0 0
+USAGE: ph_resumetextinput 0 0 0
 USAGE: ph_displayfigure 0 0 0
 USAGE: ph_playsf 0 0 0
 USAGE: ph_figureid 0 0 0
