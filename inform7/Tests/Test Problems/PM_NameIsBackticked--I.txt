@@ -1,0 +1,16 @@
+Inform 7 v10.2.0 has started.
+I've now read your source text, which is 12 words long.
+I've also read version 10.2.0 of Basic Inform by Graham Nelson, which is 11221 words long.
+I've also read version 10.2.0 of English Language by Graham Nelson, which is 2330 words long.
+I've also read version 10.2.0 of Standard Rules by Graham Nelson, which is 35497 words long.
+Problem__ PM_NameIsBackticked
+  >--> You wrote 'The Ticking` Room is a room' (source text, line 1): but this
+    seems to give something a name which includes a backtick character `, which
+    is not allowed since the backtick has a special meaning in text
+    substitutions, so this would be ambiguous. (If you need, say, a room which
+    the player sees as '`Tick`', you can get this effect with: 'Tick-Room is a
+    room with printed name "`Tick`".')
+Problem__ PM_NameIsBackticked
+  >--> You wrote '`banana` is a text that varies' (source text, line 3): again,
+    this seems to give something a name which includes a backtick character `.
+Inform 7 has finished.

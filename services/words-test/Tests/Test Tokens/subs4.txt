@@ -1,0 +1,6 @@
+say "[intone]";
+say "[intone] ";
+say "[intone `X` ]";
+say "[intone `[intone `X`]`]";
+say "[intone `[intone `[intone `X`]`]`]";
+say "[intone `[intone `[intone `[intone `X`]`]`]` ] ";
